@@ -103,6 +103,3 @@ tsconfig.tsbuildinfo
 # Benchmark results
 benchmark-results.json
 mutation-report.json
-
-AGENTS.md
-CLAUDE.md

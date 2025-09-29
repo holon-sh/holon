@@ -1,6 +1,6 @@
 {
   "name": "@holon/context",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Immutable context management for Holon Flow",
   "type": "module",
   "sideEffects": false,

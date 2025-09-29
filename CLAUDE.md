@@ -196,19 +196,35 @@ refactor: simplify core flow logic
 packages/[name]/
 ├── src/
 │   ├── index.ts        # Public API exports
-│   ├── core/           # Core implementation
-│   ├── utils/          # Internal utilities
+│   ├── core/           # Core implementation (if needed)
+│   ├── utils/          # Internal utilities (if needed)
 │   └── types.ts        # Type definitions
-├── tests/
-│   ├── unit/           # Unit tests
-│   ├── integration/    # Integration tests
-│   └── fixtures/       # Test fixtures
-├── bench/              # Benchmarks
-├── package.json        # Minimal config
-├── tsconfig.json       # Extends root
-├── vitest.config.ts    # Extends root
-└── README.md          # Package docs
+├── test/
+│   ├── *.test.ts       # Test files
+│   └── fixtures/       # Test fixtures (if needed)
+├── bench/              # Benchmarks (if applicable)
+├── package.json        # Package configuration
+├── tsconfig.json       # TypeScript config (includes src and test)
+├── tsconfig.build.json # Build config (src only)
+└── README.md          # Package documentation
 ```
+
+### Current Packages
+
+1. **@holon/flow** - Core Flow abstraction
+   - Pure functional composition
+   - No dependencies on Context or Effects
+   - Contains: flow creation, pipe composition, utilities
+
+2. **@holon/context** - Execution context system
+   - Immutable context with structural sharing
+   - AsyncLocalStorage integration
+   - Depends on: @holon/flow
+
+3. **@holon/effects** - Side effect management
+   - Effect descriptors and handlers
+   - Common effects library (IO, Network, etc.)
+   - Depends on: @holon/flow, @holon/context
 
 ### Package Rules
 
@@ -383,6 +399,6 @@ Every line of code should embody this philosophy. We're not just building softwa
 
 ---
 
-**Last Updated**: 2025-09-29
+**Last Updated**: 2025-09-30
 **Version**: 10.0.0
 **Status**: Living Document

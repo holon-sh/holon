@@ -1,6 +1,6 @@
-import type { Flow } from '@holon/flow';
-import { flow, EffectFlags } from '@holon/flow';
 import type { Context } from '@holon/context';
+import type { Flow } from '@holon/flow';
+import { EffectFlags, flow } from '@holon/flow';
 
 /**
  * Effect descriptor
@@ -71,11 +71,7 @@ export const Effects = {
   /**
    * Console logging effect
    */
-  log: effect(
-    'log',
-    EffectFlags.IO,
-    (message: string) => console.log(message),
-  ),
+  log: effect('log', EffectFlags.IO, (message: string) => console.log(message)),
 
   /**
    * File system read effect
@@ -138,31 +134,19 @@ export const Effects = {
   /**
    * Random number effect
    */
-  random: effect(
-    'random',
-    EffectFlags.Random,
-    () => Math.random(),
-  ),
+  random: effect('random', EffectFlags.Random, () => Math.random()),
 
   /**
    * Current time effect
    */
-  now: effect(
-    'now',
-    EffectFlags.Time,
-    () => Date.now(),
-  ),
+  now: effect('now', EffectFlags.Time, () => Date.now()),
 
   /**
    * Throw error effect
    */
-  throw: effect(
-    'throw',
-    EffectFlags.Throw,
-    (error: Error) => {
-      throw error;
-    },
-  ),
+  throw: effect('throw', EffectFlags.Throw, (error: Error) => {
+    throw error;
+  }),
 } as const;
 
 /**
@@ -184,9 +168,7 @@ export function effectful<In, Out>(
 /**
  * Mark a Flow as pure (no effects)
  */
-export function pure<In, Out>(
-  fn: (input: In) => Out,
-): EffectFlow<In, Out> {
+export function pure<In, Out>(fn: (input: In) => Out): EffectFlow<In, Out> {
   return effectful(fn, [], EffectFlags.None);
 }
 
@@ -239,11 +221,7 @@ export class EffectInterpreter {
   /**
    * Run an effectful computation
    */
-  async run<In, Out>(
-    flow: EffectFlow<In, Out>,
-    input: In,
-    _ctx: Context,
-  ): Promise<Out> {
+  async run<In, Out>(flow: EffectFlow<In, Out>, input: In, _ctx: Context): Promise<Out> {
     // Check if all effects have handlers
     for (const effect of flow.effects) {
       if (!this.handlers.has(effect.id)) {

@@ -8,33 +8,46 @@
  */
 
 // Core Flow function and types
-export { flow } from './flow.js';
-export type {
-  Flow,
-  FlowMeta,
-  FlowOptions,
-  TypeValidator,
-  Result,
-  Maybe,
-  FlowInput,
-  FlowOutput,
-  FlowChain,
-} from './types.js';
-
-// Effect flags for tracking side effects
-export { EffectFlags } from './types.js';
-
 // Core Flow utilities
 export {
-  identity,
-  constant,
+  batch,
   compose,
-  map,
+  constant,
+  debounce,
+  fallback,
   filter,
-  reduce,
+  flow,
+  identity,
+  map,
+  maybe,
+  memoize,
+  merge,
   parallel,
   race,
+  reduce,
+  repeat,
+  result,
+  retry,
+  split,
+  tap,
+  throttle,
+  timeout,
+  validate,
+  when,
 } from './flow.js';
+export type {
+  Flow,
+  FlowChain,
+  FlowInput,
+  FlowMeta,
+  FlowOptions,
+  FlowOutput,
+  Maybe,
+  Result,
+  TypeValidator,
+} from './types.js';
+// Effect flags for tracking side effects
+export { EffectFlags } from './types.js';
 
 // Note: compose can be used as pipe since they have the same functionality
 // Users can import { compose as pipe } if they prefer the pipe naming

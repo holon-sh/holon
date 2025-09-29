@@ -1,6 +1,6 @@
 {
   "name": "@holon/effects",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Effect system for controlled side effects in Holon Flow",
   "type": "module",
   "sideEffects": false,

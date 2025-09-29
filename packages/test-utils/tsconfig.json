@@ -7,14 +7,6 @@
     "tsBuildInfoFile": "dist/tsconfig.tsbuildinfo"
   },
   "include": ["src/**/*.ts"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "coverage",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ],
-  "references": [
-    { "path": "../flow" }
-  ]
+  "exclude": ["node_modules", "dist", "coverage", "**/*.test.ts", "**/*.spec.ts"],
+  "references": [{ "path": "../flow" }]
 }

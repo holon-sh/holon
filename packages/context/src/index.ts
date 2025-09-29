@@ -38,6 +38,41 @@ export interface Context {
    * Freeze the context (prevent further modifications)
    */
   freeze(): Context;
+
+  /**
+   * Delete a key from context (returns new context without the key)
+   */
+  delete(key: string | symbol): Context;
+
+  /**
+   * Clear all keys (returns empty context)
+   */
+  clear(): Context;
+
+  /**
+   * Get all entries as array of key-value pairs
+   */
+  entries(): [string | symbol, unknown][];
+
+  /**
+   * Get all values as array
+   */
+  values(): unknown[];
+
+  /**
+   * Merge multiple contexts (later contexts override earlier ones)
+   */
+  merge(...contexts: Context[]): Context;
+
+  /**
+   * Create exact copy without parent relationship
+   */
+  clone(): Context;
+
+  /**
+   * Convert to plain object (for serialization)
+   */
+  toObject(): Record<string | symbol, unknown>;
 }
 
 /**
@@ -58,7 +93,16 @@ class ImmutableContext implements Context {
     if (initial instanceof Map) {
       this.data = new Map(initial);
     } else if (initial) {
-      this.data = new Map(Object.entries(initial));
+      this.data = new Map();
+      // Handle string keys
+      for (const [key, value] of Object.entries(initial)) {
+        this.data.set(key, value);
+      }
+      // Handle symbol keys
+      const symbols = Object.getOwnPropertySymbols(initial);
+      for (const sym of symbols) {
+        this.data.set(sym, initial[sym]);
+      }
     } else {
       this.data = new Map();
     }
@@ -93,8 +137,8 @@ class ImmutableContext implements Context {
 
   async run<In, Out>(flow: Flow<In, Out>, input: In): Promise<Out> {
     // Store current context in async local storage if available
-    if (typeof (globalThis as any).AsyncLocalStorage !== 'undefined') {
-      const storage = getAsyncLocalStorage();
+    const storage = await getAsyncLocalStorage();
+    if (storage) {
       return storage.run(this, () => Promise.resolve(flow(input)));
     }
 
@@ -137,6 +181,108 @@ class ImmutableContext implements Context {
     this.frozen = true;
     return this;
   }
+
+  delete(key: string | symbol): Context {
+    if (this.frozen) {
+      throw new Error('Cannot modify frozen context');
+    }
+
+    // Create new context without the specified key
+    const newData = new Map();
+
+    // Copy all entries except the one to delete
+    for (const [k, v] of this.data) {
+      if (k !== key) {
+        newData.set(k, v);
+      }
+    }
+
+    return new ImmutableContext(newData, this.parent);
+  }
+
+  clear(): Context {
+    if (this.frozen) {
+      throw new Error('Cannot modify frozen context');
+    }
+
+    // Return new empty context (no parent to preserve clear semantics)
+    return new ImmutableContext();
+  }
+
+  entries(): [string | symbol, unknown][] {
+    const entriesMap = new Map<string | symbol, unknown>();
+
+    // Start from parent to allow child to override
+    let parent = this.parent;
+    const parentChain: ImmutableContext[] = [];
+
+    while (parent) {
+      parentChain.unshift(parent);
+      parent = parent.parent;
+    }
+
+    // Add entries from parent chain
+    for (const ctx of parentChain) {
+      for (const [key, value] of ctx.data) {
+        entriesMap.set(key, value);
+      }
+    }
+
+    // Add entries from this context (overrides parent)
+    for (const [key, value] of this.data) {
+      entriesMap.set(key, value);
+    }
+
+    return Array.from(entriesMap.entries());
+  }
+
+  values(): unknown[] {
+    return this.entries().map(([_, value]) => value);
+  }
+
+  merge(...contexts: Context[]): Context {
+    if (this.frozen) {
+      throw new Error('Cannot modify frozen context');
+    }
+
+    // Start with current context's data
+    const mergedData = new Map<string | symbol, unknown>();
+
+    // Add all entries from this context
+    for (const [key, value] of this.entries()) {
+      mergedData.set(key, value);
+    }
+
+    // Merge in data from other contexts
+    for (const ctx of contexts) {
+      for (const [key, value] of ctx.entries()) {
+        mergedData.set(key, value);
+      }
+    }
+
+    return new ImmutableContext(mergedData);
+  }
+
+  clone(): Context {
+    // Create new context with all data but no parent
+    const clonedData = new Map<string | symbol, unknown>();
+
+    for (const [key, value] of this.entries()) {
+      clonedData.set(key, value);
+    }
+
+    return new ImmutableContext(clonedData);
+  }
+
+  toObject(): Record<string | symbol, unknown> {
+    const obj: Record<string | symbol, unknown> = {};
+
+    for (const [key, value] of this.entries()) {
+      obj[key] = value;
+    }
+
+    return obj;
+  }
 }
 
 /**
@@ -156,10 +302,17 @@ export const emptyContext = context().freeze();
  */
 let asyncLocalStorage: any;
 
-function getAsyncLocalStorage() {
-  if (!asyncLocalStorage && typeof (globalThis as any).AsyncLocalStorage !== 'undefined') {
-    const AsyncLocalStorage = (globalThis as any).AsyncLocalStorage;
-    asyncLocalStorage = new AsyncLocalStorage();
+async function getAsyncLocalStorage() {
+  if (!asyncLocalStorage) {
+    // Try to import from Node.js async_hooks
+    if (typeof globalThis.process !== 'undefined' && globalThis.process.versions?.node) {
+      try {
+        const { AsyncLocalStorage } = await import('node:async_hooks');
+        asyncLocalStorage = new AsyncLocalStorage();
+      } catch {
+        // AsyncLocalStorage not available
+      }
+    }
   }
   return asyncLocalStorage;
 }
@@ -167,19 +320,16 @@ function getAsyncLocalStorage() {
 /**
  * Get current context from async local storage
  */
-export function getCurrentContext(): Context | undefined {
-  const storage = getAsyncLocalStorage();
+export async function getCurrentContext(): Promise<Context | undefined> {
+  const storage = await getAsyncLocalStorage();
   return storage?.getStore();
 }
 
 /**
  * Run a function with a specific context
  */
-export async function withContext<T>(
-  ctx: Context,
-  fn: () => T | Promise<T>,
-): Promise<T> {
-  const storage = getAsyncLocalStorage();
+export async function withContext<T>(ctx: Context, fn: () => T | Promise<T>): Promise<T> {
+  const storage = await getAsyncLocalStorage();
   if (storage) {
     return storage.run(ctx, fn);
   }
@@ -192,12 +342,12 @@ export async function withContext<T>(
 export function contextual<In, Out>(
   fn: (input: In, ctx: Context) => Out | Promise<Out>,
 ): Flow<In, Out> {
-  const flow = ((input: In) => {
-    const ctx = getCurrentContext() ?? emptyContext;
+  const flow = (async (input: In) => {
+    const ctx = (await getCurrentContext()) ?? emptyContext;
     return fn(input, ctx);
   }) as Flow<In, Out>;
 
-  flow.pipe = function <Next>(next: Flow<Out, Next>): Flow<In, Next> {
+  flow.pipe = <Next>(next: Flow<Out, Next>): Flow<In, Next> => {
     const piped = ((input: In) => {
       const intermediate = flow(input);
       if (intermediate instanceof Promise) {
@@ -206,9 +356,7 @@ export function contextual<In, Out>(
       return next(intermediate);
     }) as Flow<In, Next>;
 
-    piped.pipe = function <Final>(final: Flow<Next, Final>) {
-      return flow.pipe(next.pipe(final));
-    };
+    piped.pipe = <Final>(final: Flow<Next, Final>) => flow.pipe(next.pipe(final));
 
     return piped;
   };
@@ -238,3 +386,7 @@ export const ContextKeys = {
 export function createContextKey(name: string): symbol {
   return Symbol(name);
 }
+
+// Export module system
+export type { JSONSchema, ModularContext, Module, ModuleDefinition } from './module.js';
+export { clearModuleRegistry, contextModule, createModule, withModules } from './module.js';

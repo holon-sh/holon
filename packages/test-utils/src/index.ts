@@ -49,11 +49,7 @@ export const flowProperty = {
   /**
    * Test identity laws
    */
-  identity<T>(
-    flow: Flow<T, T>,
-    identity: Flow<T, T>,
-    arbitrary: fc.Arbitrary<T>,
-  ) {
+  identity<T>(flow: Flow<T, T>, identity: Flow<T, T>, arbitrary: fc.Arbitrary<T>) {
     return fc.assert(
       fc.asyncProperty(arbitrary, async (input) => {
         const leftIdentity = await identity.pipe(flow)(input);
@@ -84,7 +80,7 @@ export function trackingFlow<In, Out>(
     return output;
   }) as Flow<In, Out> & { tracker: typeof tracker };
 
-  flow.pipe = function <Next>(next: Flow<Out, Next>) {
+  flow.pipe = <Next>(next: Flow<Out, Next>) => {
     const piped = ((input: In) => {
       const intermediate = flow(input);
       if (intermediate instanceof Promise) {
@@ -93,9 +89,7 @@ export function trackingFlow<In, Out>(
       return next(intermediate);
     }) as Flow<In, Next>;
 
-    piped.pipe = function <Final>(final: Flow<Next, Final>) {
-      return flow.pipe(next.pipe(final));
-    };
+    piped.pipe = <Final>(final: Flow<Next, Final>) => flow.pipe(next.pipe(final));
 
     return piped;
   };
@@ -112,9 +106,10 @@ export function delayedFlow<In, Out>(
   delay: number,
 ): Flow<In, Promise<Out>> {
   return ((input: In) =>
-    new Promise<Out>((resolve) =>
-      setTimeout(() => resolve(fn(input)), delay)
-    )) as Flow<In, Promise<Out>>;
+    new Promise<Out>((resolve) => setTimeout(() => resolve(fn(input)), delay))) as Flow<
+    In,
+    Promise<Out>
+  >;
 }
 
 /**
@@ -136,7 +131,7 @@ export async function measureFlow<In, Out>(
 export async function isPure<In, Out>(
   flow: Flow<In, Out>,
   input: In,
-  iterations: number = 10,
+  iterations = 10,
 ): Promise<boolean> {
   const results: Out[] = [];
 
@@ -178,20 +173,16 @@ export class ControllableFlow<In, Out> {
   constructor(initialBehavior: (input: In) => Out | Promise<Out>) {
     this.behavior = initialBehavior;
     this.flow = ((input: In) => this.behavior(input)) as Flow<In, Out>;
-
-    const self = this;
-    this.flow.pipe = function <Next>(next: Flow<Out, Next>) {
+    this.flow.pipe = <Next>(next: Flow<Out, Next>) => {
       const piped = ((input: In) => {
-        const intermediate = self.flow(input);
+        const intermediate = this.flow(input);
         if (intermediate instanceof Promise) {
           return intermediate.then((value) => next(value));
         }
         return next(intermediate);
       }) as Flow<In, Next>;
 
-      piped.pipe = function <Final>(final: Flow<Next, Final>) {
-        return self.flow.pipe(next.pipe(final));
-      };
+      piped.pipe = <Final>(final: Flow<Next, Final>) => this.flow.pipe(next.pipe(final));
 
       return piped;
     };
@@ -214,9 +205,7 @@ export class ControllableFlow<In, Out> {
   delay(ms: number) {
     const original = this.behavior;
     this.behavior = (input: In) =>
-      new Promise<Out>((resolve) =>
-        setTimeout(() => resolve(original(input) as Out), ms)
-      );
+      new Promise<Out>((resolve) => setTimeout(() => resolve(original(input) as Out), ms));
   }
 }
 
@@ -243,11 +232,338 @@ export const arbitraries = {
       .map(
         ([fn, delay]) =>
           ((input: In) =>
-            new Promise<Out>((resolve) =>
-              setTimeout(() => resolve(fn(input)), delay)
-            )) as Flow<In, Promise<Out>>
+            new Promise<Out>((resolve) => setTimeout(() => resolve(fn(input)), delay))) as Flow<
+            In,
+            Promise<Out>
+          >,
       ),
 };
 
 // Re-export fast-check for convenience
 export { fc };
+
+/**
+ * Mock Flow that returns predefined values
+ */
+export class MockFlow<In, Out> {
+  private responses: Map<string, Out> = new Map();
+  private defaultResponse: Out | undefined;
+  private callHistory: Array<{ input: In; output: Out; timestamp: number }> = [];
+  public flow: Flow<In, Out>;
+
+  constructor(defaultResponse?: Out) {
+    this.defaultResponse = defaultResponse;
+    this.flow = ((input: In) => {
+      const key = JSON.stringify(input);
+      const output = this.responses.get(key) ?? this.defaultResponse;
+
+      if (output === undefined) {
+        throw new Error(`No mock response configured for input: ${key}`);
+      }
+
+      this.callHistory.push({
+        input,
+        output,
+        timestamp: Date.now(),
+      });
+
+      return output;
+    }) as Flow<In, Out>;
+
+    // Add pipe method
+    this.flow.pipe = <Next>(next: Flow<Out, Next>) => {
+      const piped = ((input: In) => {
+        const intermediate = this.flow(input);
+        if (intermediate instanceof Promise) {
+          return intermediate.then((value) => next(value));
+        }
+        return next(intermediate);
+      }) as Flow<In, Next>;
+
+      piped.pipe = <Final>(final: Flow<Next, Final>) => this.flow.pipe(next.pipe(final));
+
+      return piped;
+    };
+  }
+
+  whenInput(input: In): { thenReturn: (output: Out) => void } {
+    return {
+      thenReturn: (output: Out) => {
+        this.responses.set(JSON.stringify(input), output);
+      },
+    };
+  }
+
+  getCallHistory() {
+    return [...this.callHistory];
+  }
+
+  getCallCount() {
+    return this.callHistory.length;
+  }
+
+  wasCalledWith(input: In): boolean {
+    const key = JSON.stringify(input);
+    return this.callHistory.some((call) => JSON.stringify(call.input) === key);
+  }
+
+  reset() {
+    this.callHistory = [];
+  }
+
+  resetAll() {
+    this.responses.clear();
+    this.callHistory = [];
+  }
+}
+
+/**
+ * Spy Flow that wraps and observes another Flow
+ */
+export class SpyFlow<In, Out> {
+  private callHistory: Array<{
+    input: In;
+    output?: Out;
+    error?: Error;
+    duration: number;
+    timestamp: number;
+  }> = [];
+  public flow: Flow<In, Out>;
+
+  constructor(targetFlow: Flow<In, Out>) {
+    this.flow = ((input: In) => {
+      const start = performance.now();
+      const timestamp = Date.now();
+
+      try {
+        const output = targetFlow(input);
+
+        // Handle both sync and async flows
+        if (output instanceof Promise) {
+          return output.then(
+            (result) => {
+              const duration = performance.now() - start;
+              this.callHistory.push({
+                input,
+                output: result,
+                duration,
+                timestamp,
+              });
+              return result;
+            },
+            (error) => {
+              const duration = performance.now() - start;
+              this.callHistory.push({
+                input,
+                error: error as Error,
+                duration,
+                timestamp,
+              });
+              throw error;
+            },
+          );
+        }
+
+        // Synchronous result
+        const duration = performance.now() - start;
+        this.callHistory.push({
+          input,
+          output,
+          duration,
+          timestamp,
+        });
+        return output;
+      } catch (error) {
+        const duration = performance.now() - start;
+        this.callHistory.push({
+          input,
+          error: error as Error,
+          duration,
+          timestamp,
+        });
+        throw error;
+      }
+    }) as Flow<In, Out>;
+
+    // Add pipe method
+    this.flow.pipe = <Next>(next: Flow<Out, Next>) => {
+      const piped = ((input: In) => {
+        const intermediate = this.flow(input);
+        if (intermediate instanceof Promise) {
+          return intermediate.then((value) => next(value));
+        }
+        return next(intermediate);
+      }) as Flow<In, Next>;
+
+      piped.pipe = <Final>(final: Flow<Next, Final>) => this.flow.pipe(next.pipe(final));
+
+      return piped;
+    };
+  }
+
+  getCallHistory() {
+    return [...this.callHistory];
+  }
+
+  getCallCount() {
+    return this.callHistory.length;
+  }
+
+  getLastCall() {
+    return this.callHistory[this.callHistory.length - 1];
+  }
+
+  getAverageDuration() {
+    if (this.callHistory.length === 0) {
+      return 0;
+    }
+    const total = this.callHistory.reduce((sum, call) => sum + call.duration, 0);
+    return total / this.callHistory.length;
+  }
+
+  wasCalledWith(input: In): boolean {
+    const key = JSON.stringify(input);
+    return this.callHistory.some((call) => JSON.stringify(call.input) === key);
+  }
+
+  getCallsWithErrors() {
+    return this.callHistory.filter((call) => call.error);
+  }
+
+  reset() {
+    this.callHistory = [];
+  }
+}
+
+/**
+ * Stub Flow that can be configured with various behaviors
+ */
+export class StubFlow<In, Out> {
+  private behaviors: Array<{
+    predicate?: (input: In) => boolean;
+    behavior: (input: In) => Out | Promise<Out>;
+  }> = [];
+  private defaultBehavior?: (input: In) => Out | Promise<Out>;
+  private callCount = 0;
+  public flow: Flow<In, Out>;
+
+  constructor() {
+    this.flow = ((input: In) => {
+      this.callCount++;
+      const behavior = this.behaviors.find((b) => !b.predicate || b.predicate(input));
+
+      if (behavior) {
+        return behavior.behavior(input);
+      }
+
+      if (this.defaultBehavior) {
+        return this.defaultBehavior(input);
+      }
+
+      throw new Error(`No stub behavior configured for input: ${JSON.stringify(input)}`);
+    }) as Flow<In, Out>;
+
+    // Add pipe method
+    this.flow.pipe = <Next>(next: Flow<Out, Next>) => {
+      const piped = ((input: In) => {
+        const intermediate = this.flow(input);
+        if (intermediate instanceof Promise) {
+          return intermediate.then((value) => next(value));
+        }
+        return next(intermediate);
+      }) as Flow<In, Next>;
+
+      piped.pipe = <Final>(final: Flow<Next, Final>) => this.flow.pipe(next.pipe(final));
+
+      return piped;
+    };
+  }
+
+  returns(value: Out) {
+    this.defaultBehavior = () => value;
+    return this;
+  }
+
+  throws(error: Error) {
+    this.defaultBehavior = () => {
+      throw error;
+    };
+    return this;
+  }
+
+  callsFake(fn: (input: In) => Out | Promise<Out>) {
+    this.defaultBehavior = fn;
+    return this;
+  }
+
+  onCall(n: number): {
+    returns: (value: Out) => StubFlow<In, Out>;
+    throws: (error: Error) => StubFlow<In, Out>;
+  } {
+    return {
+      returns: (value: Out) => {
+        this.behaviors.push({
+          predicate: () => this.callCount === n,
+          behavior: () => value,
+        });
+        return this;
+      },
+      throws: (error: Error) => {
+        this.behaviors.push({
+          predicate: () => this.callCount === n,
+          behavior: () => {
+            throw error;
+          },
+        });
+        return this;
+      },
+    };
+  }
+
+  withArgs(predicate: (input: In) => boolean): {
+    returns: (value: Out) => StubFlow<In, Out>;
+    throws: (error: Error) => StubFlow<In, Out>;
+    callsFake: (fn: (input: In) => Out | Promise<Out>) => StubFlow<In, Out>;
+  } {
+    return {
+      returns: (value: Out) => {
+        this.behaviors.push({
+          predicate,
+          behavior: () => value,
+        });
+        return this;
+      },
+      throws: (error: Error) => {
+        this.behaviors.push({
+          predicate,
+          behavior: () => {
+            throw error;
+          },
+        });
+        return this;
+      },
+      callsFake: (fn: (input: In) => Out | Promise<Out>) => {
+        this.behaviors.push({
+          predicate,
+          behavior: fn,
+        });
+        return this;
+      },
+    };
+  }
+
+  reset() {
+    this.behaviors = [];
+    this.callCount = 0;
+    delete this.defaultBehavior;
+  }
+}
+
+/**
+ * Helper to create mock, spy, and stub Flows
+ */
+export const testFlow = {
+  mock: <In, Out>(defaultResponse?: Out) => new MockFlow<In, Out>(defaultResponse),
+  spy: <In, Out>(targetFlow: Flow<In, Out>) => new SpyFlow<In, Out>(targetFlow),
+  stub: <In, Out>() => new StubFlow<In, Out>(),
+};

@@ -1,6 +1,6 @@
 {
   "name": "@holon/flow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Core Flow abstraction - the heart of Holon",
   "type": "module",
   "sideEffects": false,

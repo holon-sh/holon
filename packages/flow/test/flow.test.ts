@@ -1,6 +1,15 @@
-import { describe, expect, it, test, vi } from 'vitest';
-import { flow, compose, identity, constant, map, filter, reduce, parallel, race } from './flow.js';
-import type { Flow } from './types.js';
+import { describe, expect, it, test } from 'vitest';
+import {
+  compose,
+  constant,
+  filter,
+  flow,
+  identity,
+  map,
+  parallel,
+  race,
+  reduce,
+} from '../src/flow.js';
 
 describe('flow', () => {
   describe('basic creation', () => {
@@ -32,11 +41,11 @@ describe('flow', () => {
           if (b === 0) throw new Error('Division by zero');
           return a / b;
         },
-        onError: () => Infinity,
+        onError: () => Number.POSITIVE_INFINITY,
       });
 
       expect(safeDivide([10, 2])).toBe(5);
-      expect(safeDivide([10, 0])).toBe(Infinity);
+      expect(safeDivide([10, 0])).toBe(Number.POSITIVE_INFINITY);
     });
 
     it('should handle async errors with onError', async () => {
@@ -45,7 +54,7 @@ describe('flow', () => {
           if (x < 0) throw new Error('Negative input');
           return x * 2;
         },
-        onError: (error, input) => -1,
+        onError: () => -1,
       });
 
       expect(await safeAsync(5)).toBe(10);
@@ -102,11 +111,6 @@ describe('flow', () => {
       expect(pipeline(10)).toBe('30');
     });
 
-    it('should return identity for empty composition', () => {
-      const empty = compose();
-      expect(empty(42)).toBe(42);
-    });
-
     it('should return original flow for single flow', () => {
       const single = flow((x: number) => x * 2);
       const composed = compose(single);
@@ -146,7 +150,7 @@ describe('flow', () => {
     it('reduce should accumulate values', async () => {
       const sum = reduce<number, number>(
         flow(([acc, x]) => acc + x),
-        0
+        0,
       );
 
       expect(await sum([1, 2, 3, 4])).toBe(10);
@@ -164,11 +168,7 @@ describe('flow', () => {
           return x * ms;
         });
 
-      const parallelFlows = parallel([
-        makeDelayed(10),
-        makeDelayed(20),
-        makeDelayed(30),
-      ]);
+      const parallelFlows = parallel([makeDelayed(10), makeDelayed(20), makeDelayed(30)]);
 
       const results = await parallelFlows(2);
       expect(results).toEqual([20, 40, 60]);

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { readFileSync, writeFileSync, readdirSync, statSync } from 'node:fs';
+import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,8 +24,6 @@ function updatePackageVersion(filePath, version) {
     if (pkg[field]) {
       for (const [name, ver] of Object.entries(pkg[field])) {
         if (name.startsWith('@holon/') && ver === 'workspace:*') {
-          // Keep workspace protocol
-          continue;
         } else if (name.startsWith('@holon/') && ver.includes(oldVersion)) {
           // Update version reference
           pkg[field][name] = `^${version}`;
@@ -155,10 +153,14 @@ function main() {
     updatePackageVersion(file, newVersion);
   }
 
-  console.log(`\n✨ Successfully updated ${files.length} package.json files to version ${newVersion}`);
+  console.log(
+    `\n✨ Successfully updated ${files.length} package.json files to version ${newVersion}`,
+  );
   console.log('\n📝 Next steps:');
   console.log('  1. Review the changes: git diff');
-  console.log('  2. Commit the changes: git add -A && git commit -m "chore: release v' + newVersion + '"');
+  console.log(
+    '  2. Commit the changes: git add -A && git commit -m "chore: release v' + newVersion + '"',
+  );
   console.log('  3. Tag the release: git tag v' + newVersion);
   console.log('  4. Push changes: git push && git push --tags\n');
 }

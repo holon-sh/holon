@@ -1,5 +1,5 @@
-import { defineConfig, mergeConfig } from 'vitest/config';
 import { resolve } from 'node:path';
+import { defineConfig, mergeConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
@@ -27,10 +27,10 @@ export default defineConfig({
         '**/.{eslint,prettier,stylelint}rc.{js,cjs,yml,json}',
       ],
       thresholds: {
-        branches: 90,
-        functions: 90,
-        lines: 90,
-        statements: 90,
+        branches: 96,
+        functions: 96,
+        lines: 96,
+        statements: 96,
       },
     },
 
@@ -40,13 +40,7 @@ export default defineConfig({
       '**/tests/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
       '**/__tests__/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
     ],
-    exclude: [
-      'node_modules/**',
-      'dist/**',
-      '.turbo/**',
-      'coverage/**',
-      '**/*.bench.{js,ts}',
-    ],
+    exclude: ['node_modules/**', 'dist/**', '.turbo/**', 'coverage/**', '**/*.bench.{js,ts}'],
 
     // Reporter configuration
     reporters: process.env.CI ? ['default', 'junit', 'json'] : ['default'],

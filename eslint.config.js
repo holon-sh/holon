@@ -15,7 +15,7 @@ export default [
       '**/*.config.js',
       '**/*.config.ts',
       '**/specs/**',
-    ]
+    ],
   },
   {
     files: ['**/*.{js,mjs,cjs,ts,tsx}'],
@@ -30,13 +30,13 @@ export default [
         __filename: 'readonly',
         URL: 'readonly',
         URLSearchParams: 'readonly',
-        globalThis: 'readonly'
-      }
+        globalThis: 'readonly',
+      },
     },
     rules: {
       'no-unused-vars': 'warn',
       'no-console': 'off',
-      'no-debugger': 'error'
-    }
-  }
+      'no-debugger': 'error',
+    },
+  },
 ];

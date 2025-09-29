@@ -129,9 +129,7 @@ export interface FlowOptions<In, Out> {
 /**
  * Result type for fallible operations
  */
-export type Result<T, E = Error> =
-  | { ok: true; value: T }
-  | { ok: false; error: E };
+export type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: E };
 
 /**
  * Maybe type for nullable values
@@ -168,15 +166,15 @@ export type FlowOutput<F> = F extends Flow<any, infer Out> ? Out : never;
  */
 export type FlowChain<T extends readonly Flow[]> = T extends readonly [
   Flow<infer First, any>,
-  ...infer Rest
+  ...infer Rest,
 ]
   ? Rest extends readonly Flow[]
     ? Rest extends readonly []
       ? T[0]
       : T[0] extends Flow<First, infer Out>
-      ? FlowChain<Rest> extends Flow<Out, infer Final>
-        ? Flow<First, Final>
+        ? FlowChain<Rest> extends Flow<Out, infer Final>
+          ? Flow<First, Final>
+          : never
         : never
-      : never
     : never
   : never;
