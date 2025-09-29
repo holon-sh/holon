@@ -1,0 +1,73 @@
+{
+  "name": "@holon/test-utils",
+  "version": "0.1.0",
+  "description": "Shared testing utilities for Holon packages",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./vitest": {
+      "types": "./dist/vitest.d.ts",
+      "import": "./dist/vitest.js",
+      "default": "./dist/vitest.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src",
+    "!src/**/*.test.ts",
+    "!src/**/*.spec.ts"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "dev": "tsc -p tsconfig.build.json --watch",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "clean": "rm -rf dist coverage .turbo"
+  },
+  "dependencies": {
+    "@holon/flow": "workspace:*",
+    "fast-check": "^4.3.0"
+  },
+  "devDependencies": {
+    "@vitest/expect": "^3.2.4",
+    "vitest": "^3.2.4"
+  },
+  "peerDependencies": {
+    "vitest": "^3.2.4"
+  },
+  "keywords": [
+    "testing",
+    "test-utils",
+    "holon",
+    "vitest"
+  ],
+  "author": "Holon Team",
+  "license": "MIT",
+  "homepage": "https://github.com/holon-flow/holon#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/holon-flow/holon.git",
+    "directory": "packages/test-utils"
+  },
+  "bugs": {
+    "url": "https://github.com/holon-flow/holon/issues"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

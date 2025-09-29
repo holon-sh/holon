@@ -1,0 +1,41 @@
+* text=auto eol=lf
+
+# Text files
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.jsx text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.toml text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.xml text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.pdf binary
+
+# Diff settings
+*.md diff=markdown
+*.json diff=json
+
+# Linguist settings
+specs/** linguist-documentation
+docs/** linguist-documentation
+*.test.ts linguist-detectable=false
+*.spec.ts linguist-detectable=false
+*.bench.ts linguist-detectable=false

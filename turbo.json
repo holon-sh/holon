@@ -1,0 +1,76 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalDependencies": ["**/.env.*local"],
+  "globalEnv": ["NODE_ENV", "CI"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**", ".next/**", "!.next/cache/**"],
+      "env": ["NODE_ENV"],
+      "cache": true
+    },
+    "test": {
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "tests/**", "**/*.test.ts", "**/*.spec.ts"],
+      "outputs": ["coverage/**"],
+      "env": ["NODE_ENV", "CI"],
+      "cache": true
+    },
+    "test:unit": {
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "**/*.test.ts"],
+      "outputs": ["coverage/**"],
+      "cache": true
+    },
+    "test:integration": {
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "**/*.integration.test.ts"],
+      "outputs": ["coverage/**"],
+      "cache": false
+    },
+    "test:e2e": {
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "**/*.e2e.test.ts"],
+      "cache": false
+    },
+    "test:coverage": {
+      "dependsOn": ["build"],
+      "outputs": ["coverage/**", "*.lcov"],
+      "cache": false
+    },
+    "test:mutation": {
+      "dependsOn": ["test"],
+      "cache": false
+    },
+    "bench": {
+      "dependsOn": ["build"],
+      "inputs": ["$TURBO_DEFAULT$", "**/*.bench.ts"],
+      "cache": false
+    },
+    "lint": {
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": [],
+      "cache": true
+    },
+    "lint:fix": {
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": [],
+      "cache": false
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$"],
+      "outputs": [],
+      "cache": true
+    },
+    "dev": {
+      "persistent": true,
+      "cache": false
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "compilerOptions": {
+    // Language and Environment
+    "target": "ES2023",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+
+    // Emit
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "newLine": "lf",
+
+    // JavaScript Support
+    "allowJs": false,
+    "checkJs": false,
+
+    // Interop Constraints
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+
+    // Type Checking
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+
+    // Skip Lib Check
+    "skipLibCheck": true,
+
+    // Experimental
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    // Module Resolution
+    "resolveJsonModule": true,
+    "allowImportingTsExtensions": false,
+
+    // Output
+    "outDir": "dist",
+    "rootDir": ".",
+
+    // Project References
+    "composite": false,
+    "incremental": true
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    ".turbo",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.bench.ts",
+    "**/tests/**"
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "name": "holon",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Holon Flow: Quantum Computing Architecture - Monorepo",
+  "homepage": "https://github.com/holon-flow/holon",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/holon-flow/holon.git"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0",
+    "bun": ">=1.0.0",
+    "deno": ">=1.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test",
+    "test:unit": "turbo test:unit",
+    "test:integration": "turbo test:integration",
+    "test:e2e": "turbo test:e2e",
+    "test:coverage": "turbo test:coverage",
+    "test:mutation": "turbo test:mutation",
+    "bench": "turbo bench",
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint:fix",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,yml,yaml}\"",
+    "typecheck": "turbo typecheck",
+    "clean": "turbo clean && rm -rf node_modules",
+    "changeset": "changeset",
+    "version": "changeset version",
+    "version:bump": "node scripts/bump-version.js",
+    "version:major": "node scripts/bump-version.js major",
+    "version:minor": "node scripts/bump-version.js minor",
+    "version:patch": "node scripts/bump-version.js patch",
+    "release": "turbo build && changeset publish",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.4",
+    "@changesets/cli": "^2.29.7",
+    "@types/node": "^24.5.2",
+    "@vitest/ui": "^3.2.4",
+    "eslint": "^9.36.0",
+    "eslint-config-prettier": "^10.1.8",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.3",
+    "prettier": "^3.6.2",
+    "turbo": "^2.5.8",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.7",
+    "vitest": "^3.2.4"
+  },
+  "pnpm": {
+    "overrides": {}
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ]
+}

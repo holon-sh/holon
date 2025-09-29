@@ -1,0 +1,14 @@
+node_modules
+dist
+build
+coverage
+.turbo
+.next
+.nuxt
+.vuepress/dist
+*.log
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+CHANGELOG.md
+.changeset
