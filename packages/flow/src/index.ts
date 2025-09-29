@@ -49,3 +49,7 @@ export type {
 
 // Note: compose can be used as pipe since they have the same functionality
 // Users can import { compose as pipe } if they prefer the pipe naming
+
+// Module exports for modular architecture
+export { coreModule, createFlowModule } from './module.js';
+export type { CoreModule } from './module.js';
