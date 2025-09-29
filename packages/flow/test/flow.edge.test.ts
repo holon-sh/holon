@@ -16,7 +16,6 @@ import {
   throttle,
   validate,
 } from '../src/flow.js';
-import { EffectFlags } from '../src/types.js';
 
 describe('Flow Edge Cases and Coverage', () => {
   describe('Error handling with onError', () => {
@@ -304,20 +303,6 @@ describe('Flow Edge Cases and Coverage', () => {
       const safeResult = result(simple);
 
       expect(safeResult.meta?.performance).toBeUndefined();
-    });
-  });
-
-  describe('Export checks', () => {
-    test('EffectFlags enum should be accessible', () => {
-      expect(EffectFlags.None).toBe(0);
-      expect(EffectFlags.Read).toBe(1);
-      expect(EffectFlags.Write).toBe(2);
-      expect(EffectFlags.IO).toBe(4);
-      expect(EffectFlags.Network).toBe(8);
-      expect(EffectFlags.Random).toBe(16);
-      expect(EffectFlags.Time).toBe(32);
-      expect(EffectFlags.Throw).toBe(64);
-      expect(EffectFlags.Async).toBe(128);
     });
   });
 

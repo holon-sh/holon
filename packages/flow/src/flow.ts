@@ -605,15 +605,22 @@ export const memoize = <In, Out>(
  */
 export const debounce = <In, Out>(targetFlow: Flow<In, Out>, ms: number): Flow<In, Out> => {
   let timer: NodeJS.Timeout | undefined;
-  let lastResolve: ((value: Out | Promise<Out>) => void) | undefined;
+  let pendingResolves: Array<(value: Out | Promise<Out>) => void> = [];
+  let lastInput: In | undefined;
 
   return flow(
     (input: In) =>
       new Promise<Out>((resolve) => {
         if (timer) clearTimeout(timer);
-        lastResolve = resolve;
-        timer = setTimeout(() => {
-          lastResolve!(targetFlow(input));
+        pendingResolves.push(resolve);
+        lastInput = input;
+
+        timer = setTimeout(async () => {
+          const result = await targetFlow(lastInput!);
+          const resolves = pendingResolves;
+          pendingResolves = [];
+          timer = undefined;
+          resolves.forEach(r => r(result));
         }, ms);
       }),
     {
@@ -903,18 +910,25 @@ export const batch = <In, Out>(
   let timer: ReturnType<typeof setTimeout> | null = null;
 
   const processBatch = async () => {
-    const currentBatch = queue.splice(0, size);
-    if (currentBatch.length === 0) return;
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
 
-    try {
-      const inputs = currentBatch.map((item) => item.input);
-      const outputs = await targetFlow(inputs);
+    while (queue.length > 0) {
+      const currentBatch = queue.splice(0, Math.min(size, queue.length));
+      if (currentBatch.length === 0) break;
 
-      currentBatch.forEach((item, index) => {
-        item.resolve(outputs[index]!);
-      });
-    } catch (error) {
-      currentBatch.forEach((item) => item.reject(error));
+      try {
+        const inputs = currentBatch.map((item) => item.input);
+        const outputs = await targetFlow(inputs);
+
+        currentBatch.forEach((item, index) => {
+          item.resolve(outputs[index]!);
+        });
+      } catch (error) {
+        currentBatch.forEach((item) => item.reject(error));
+      }
     }
   };
 
@@ -925,6 +939,7 @@ export const batch = <In, Out>(
 
         if (queue.length >= size) {
           if (timer) clearTimeout(timer);
+          timer = null;
           void processBatch();
         } else if (!timer) {
           timer = setTimeout(() => {

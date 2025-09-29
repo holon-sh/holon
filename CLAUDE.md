@@ -4,6 +4,20 @@
 
 We are building the future of computing—a quantum-inspired, holonic architecture that synthesizes radical simplicity with unlimited power. Every line of code should advance this vision.
 
+## ⚠️ CRITICAL: Zero-Tolerance Reliability Policy
+
+**This is a HIGH-RELIABILITY FRAMEWORK**. We DO NOT make assumptions, approximations, or partial implementations:
+
+- **100% Runtime Compatibility**: All code MUST work identically on Node.js, Bun, and Deno
+- **100% Test Coverage**: Every function, branch, and edge case MUST be tested
+- **Zero Warnings**: No TypeScript warnings, no linter warnings, no deprecation warnings
+- **Zero External Dependencies**: Core packages have ZERO external runtime dependencies
+- **No "Good Enough"**: If it's not perfect, it's not ready
+- **No Workarounds**: Fix the root cause, not the symptom
+- **No Assumptions**: Test everything, verify everything, prove everything
+
+**REMEMBER**: This framework will power critical systems. A single bug could have catastrophic consequences. There is NO room for error.
+
 ## 📐 Core Principles
 
 ### 1. Simplicity First, Power Through Composition

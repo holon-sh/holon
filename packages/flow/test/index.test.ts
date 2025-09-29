@@ -40,19 +40,6 @@ describe('Index exports', () => {
     expect(exports.validate).toBeDefined();
   });
 
-  test('should export EffectFlags enum', () => {
-    expect(exports.EffectFlags).toBeDefined();
-    expect(exports.EffectFlags.None).toBe(0);
-    expect(exports.EffectFlags.Read).toBe(1);
-    expect(exports.EffectFlags.Write).toBe(2);
-    expect(exports.EffectFlags.IO).toBe(4);
-    expect(exports.EffectFlags.Network).toBe(8);
-    expect(exports.EffectFlags.Random).toBe(16);
-    expect(exports.EffectFlags.Time).toBe(32);
-    expect(exports.EffectFlags.Throw).toBe(64);
-    expect(exports.EffectFlags.Async).toBe(128);
-  });
-
   test('should have correct TypeScript types', () => {
     // Type exports are checked at compile time
     // This test verifies the exports exist at runtime
@@ -76,7 +63,6 @@ describe('Index exports', () => {
       'result',
       'tap',
       'validate',
-      'EffectFlags',
     ];
 
     typeExports.forEach((name) => {

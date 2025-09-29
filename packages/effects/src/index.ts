@@ -1,6 +1,21 @@
 import type { Context } from '@holon/context';
 import type { Flow } from '@holon/flow';
-import { EffectFlags, flow } from '@holon/flow';
+import { flow } from '@holon/flow';
+
+/**
+ * Effect flags for tracking side effects
+ */
+export enum EffectFlags {
+  None = 0,
+  Read = 1 << 0,
+  Write = 1 << 1,
+  IO = 1 << 2,
+  Network = 1 << 3,
+  Random = 1 << 4,
+  Time = 1 << 5,
+  Throw = 1 << 6,
+  Async = 1 << 7,
+}
 
 /**
  * Effect descriptor

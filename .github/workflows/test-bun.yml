@@ -1,0 +1,65 @@
+name: Test with Bun
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  test:
+    name: Bun Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        bun-version: ['1.2.x', 'latest']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ matrix.bun-version }}
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests
+        run: bun run vitest --run
+
+      - name: Run type checking
+        run: bun run typecheck
+
+      - name: Run linting
+        run: bun run lint
+
+      - name: Test build
+        run: bun run build
+
+  coverage:
+    name: Test Coverage with Bun
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests with coverage
+        run: bun run vitest --run --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/lcov.info
+          flags: bun
+          name: bun-coverage

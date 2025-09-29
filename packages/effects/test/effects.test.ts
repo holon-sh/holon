@@ -1,9 +1,10 @@
 import { context } from '@holon/context';
-import { EffectFlags, flow } from '@holon/flow';
+import { flow } from '@holon/flow';
 import { describe, expect, test, vi } from 'vitest';
 import {
   combineEffects,
   EffectInterpreter,
+  EffectFlags,
   Effects,
   effect,
   effectful,
@@ -406,6 +407,29 @@ describe('Effects Handlers', () => {
       );
 
       if (originalProcess) globalThis.process = originalProcess;
+    });
+  });
+
+  describe('EffectFlags export', () => {
+    test('should export EffectFlags enum with correct values', () => {
+      expect(EffectFlags).toBeDefined();
+      expect(EffectFlags.None).toBe(0);
+      expect(EffectFlags.Read).toBe(1 << 0);
+      expect(EffectFlags.Write).toBe(1 << 1);
+      expect(EffectFlags.IO).toBe(1 << 2);
+      expect(EffectFlags.Network).toBe(1 << 3);
+      expect(EffectFlags.Random).toBe(1 << 4);
+      expect(EffectFlags.Time).toBe(1 << 5);
+      expect(EffectFlags.Throw).toBe(1 << 6);
+      expect(EffectFlags.Async).toBe(1 << 7);
+    });
+
+    test('should support bitwise operations', () => {
+      const combined = EffectFlags.Read | EffectFlags.Write | EffectFlags.Async;
+      expect(combined & EffectFlags.Read).toBeTruthy();
+      expect(combined & EffectFlags.Write).toBeTruthy();
+      expect(combined & EffectFlags.Async).toBeTruthy();
+      expect(combined & EffectFlags.Network).toBeFalsy();
     });
   });
 });

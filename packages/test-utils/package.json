@@ -1,6 +1,6 @@
 {
   "name": "@holon/test-utils",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Shared testing utilities for Holon packages",
   "type": "module",
   "sideEffects": false,

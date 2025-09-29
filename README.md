@@ -141,20 +141,37 @@ This is a monorepo managed with [Turborepo](https://turbo.build/) and [pnpm](htt
 
 ### Prerequisites
 
-- Node.js >= 20
+- Node.js >= 20, Bun >= 1.0, or Deno >= 1.0
 - pnpm >= 9
+
+### Runtime Support
+
+| Runtime | Status | Test Command |
+|---------|--------|--------------|
+| Node.js 20+ | ✅ Full support | `npm test` |
+| Bun 1.0+ | ✅ Full support | `bun test` or `bun run vitest --run` |
+| Deno 1.0+ | ✅ Full support | `deno test` |
+| Browser | ✅ Full support | Via bundlers |
 
 ### Setup
 
 ```bash
-# Install dependencies
+# Install dependencies (choose one)
 pnpm install
+bun install
+npm install
 
 # Build all packages
 pnpm build
+# or
+bun run build
 
 # Run tests
 pnpm test
+# or with Bun
+bun run vitest --run
+# or with native Bun test runner (experimental)
+bun test
 
 # Run tests with coverage
 pnpm test:coverage

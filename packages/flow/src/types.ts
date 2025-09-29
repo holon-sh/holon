@@ -137,21 +137,6 @@ export type Result<T, E = Error> = { ok: true; value: T } | { ok: false; error: 
 export type Maybe<T> = T | null | undefined;
 
 /**
- * Effect flags for tracking side effects
- */
-export enum EffectFlags {
-  None = 0,
-  Read = 1 << 0,
-  Write = 1 << 1,
-  IO = 1 << 2,
-  Network = 1 << 3,
-  Random = 1 << 4,
-  Time = 1 << 5,
-  Throw = 1 << 6,
-  Async = 1 << 7,
-}
-
-/**
  * Utility type to extract input type from a Flow
  */
 export type FlowInput<F> = F extends Flow<infer In, any> ? In : never;

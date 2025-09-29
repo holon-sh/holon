@@ -1,6 +1,6 @@
 {
   "name": "holon",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "description": "Holon Flow: Quantum Computing Architecture - Monorepo",
@@ -26,6 +26,7 @@
     "test:e2e": "turbo test:e2e",
     "test:coverage": "turbo test:coverage",
     "test:mutation": "turbo test:mutation",
+    "test:bun": "/Users/taaliman/.bun/bin/bun run vitest --run",
     "bench": "turbo bench",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",

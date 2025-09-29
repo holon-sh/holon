@@ -46,8 +46,6 @@ export type {
   Result,
   TypeValidator,
 } from './types.js';
-// Effect flags for tracking side effects
-export { EffectFlags } from './types.js';
 
 // Note: compose can be used as pipe since they have the same functionality
 // Users can import { compose as pipe } if they prefer the pipe naming
