@@ -5,10 +5,10 @@
 
 set -e
 
-BUN="/Users/taaliman/.bun/bin/bun"
+BUN="bun"
 
-if [ ! -f "$BUN" ]; then
-  echo "❌ Bun not found at $BUN"
+if ! command -v "$BUN" &> /dev/null; then
+  echo "❌ Bun not found"
   echo "Please install Bun: curl -fsSL https://bun.sh/install | bash"
   exit 1
 fi

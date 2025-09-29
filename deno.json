@@ -1,0 +1,14 @@
+{
+  "tasks": {
+    "test": "vitest run"
+  },
+  "imports": {
+    "npm:": "npm:"
+  },
+  "nodeModulesDir": "auto",
+  "compilerOptions": {
+    "lib": ["deno.window", "dom"],
+    "allowJs": true,
+    "strict": true
+  }
+}

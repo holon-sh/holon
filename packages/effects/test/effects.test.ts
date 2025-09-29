@@ -362,7 +362,9 @@ describe('Effects Handlers', () => {
   });
 
   describe('Runtime-specific file operations', () => {
-    test('should handle Deno runtime', async () => {
+    test.skipIf(typeof (globalThis as any).Deno !== 'undefined')('should handle Deno runtime', async () => {
+      const originalDeno = (globalThis as any).Deno;
+
       (globalThis as any).Deno = {
         readTextFile: vi.fn(async () => 'deno content'),
         writeTextFile: vi.fn(async () => undefined),
@@ -374,10 +376,17 @@ describe('Effects Handlers', () => {
       await Effects.writeFile.handler(['test.txt', 'content'], context());
       expect((globalThis as any).Deno.writeTextFile).toHaveBeenCalled();
 
-      delete (globalThis as any).Deno;
+      // Restore original Deno global
+      if (originalDeno) {
+        (globalThis as any).Deno = originalDeno;
+      } else {
+        delete (globalThis as any).Deno;
+      }
     });
 
-    test('should handle Bun runtime', async () => {
+    test.skipIf(typeof (globalThis as any).Bun !== 'undefined' || typeof (globalThis as any).Deno !== 'undefined')('should handle Bun runtime', async () => {
+      const originalBun = (globalThis as any).Bun;
+
       (globalThis as any).Bun = {
         file: vi.fn(() => ({ text: async () => 'bun content' })),
         write: vi.fn(async () => undefined),
@@ -389,11 +398,19 @@ describe('Effects Handlers', () => {
       await Effects.writeFile.handler(['test.txt', 'content'], context());
       expect((globalThis as any).Bun.write).toHaveBeenCalled();
 
-      delete (globalThis as any).Bun;
+      // Restore original Bun global
+      if (originalBun) {
+        (globalThis as any).Bun = originalBun;
+      } else {
+        delete (globalThis as any).Bun;
+      }
     });
 
-    test('should throw error when no runtime available', async () => {
+    test.skipIf(typeof (globalThis as any).Deno !== 'undefined' || typeof (globalThis as any).Bun !== 'undefined')('should throw error when no runtime available', async () => {
       const originalProcess = globalThis.process;
+      const originalDeno = (globalThis as any).Deno;
+      const originalBun = (globalThis as any).Bun;
+
       delete (globalThis as any).process;
       delete (globalThis as any).Deno;
       delete (globalThis as any).Bun;
@@ -406,7 +423,10 @@ describe('Effects Handlers', () => {
         'File system not available in this runtime',
       );
 
+      // Restore all original globals
       if (originalProcess) globalThis.process = originalProcess;
+      if (originalDeno) (globalThis as any).Deno = originalDeno;
+      if (originalBun) (globalThis as any).Bun = originalBun;
     });
   });
 
