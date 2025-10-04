@@ -1,25 +1,28 @@
-# Holon Flow: Квантовая Архитектура Вычислений
+# Holon Flow: Универсальная Архитектура Композиционных Систем
 
-**Version:** 10.0.0
-**Status:** Ultimate Architecture Definition
-**Date:** 2025-09-29
-**Philosophy:** Синтез Простоты и Мощи
+**Version:** 11.0.0
+**Status:** Production-Ready Architecture Definition
+**Date:** 2025-10-04
+**Philosophy:** Минимальное Ядро, Максимальные Возможности
 
 > "Совершенство достигается не тогда, когда нечего добавить, а когда нечего отнять."
 > — Антуан де Сент-Экзюпери
 
 ---
 
-## Манифест: Новая Онтология Разработки
+## Манифест: Универсальный Конструктор Систем
 
-### Квантовый Принцип
-Каждое вычисление существует в **суперпозиции возможных состояний** до момента выполнения. Flow не определяет *как* будет выполнен код, а описывает *что* должно произойти. Оптимизатор выбирает наилучший путь выполнения в зависимости от контекста.
+### Принцип Адаптивной Сложности
+Каждое вычисление начинается с **минимального API** и растёт по мере необходимости. Flow не диктует архитектуру, а адаптируется к потребностям. Система выбирает оптимальный путь выполнения на основе контекста и целей.
 
 ### Холонический Принцип
-Каждый Flow является **холоном** — одновременно целостной системой и частью большей системы. Атом и галактика. Функция и платформа. Это обеспечивает **фрактальное самоподобие** на всех уровнях абстракции.
+Каждый Flow является **холоном** — одновременно целостной системой и частью большей системы. Функция может быть системой, система — функцией. Это обеспечивает **единообразную композицию** на всех уровнях абстракции.
 
-### Принцип Семантической Компрессии
-Код должен выражать **суть**, а не детали реализации. Через композицию простых Flow создаются сложные системы, где каждый уровень абстракции скрывает сложность предыдущего.
+### Принцип Целенаправленности (Телеология)
+Flow может иметь **явные цели** (objectives). Система использует эти цели для автоматической оптимизации и управления выполнением, выбирая лучший путь к достижению результата.
+
+### Принцип Семантической Ясности
+Код должен выражать не только *что* делает, но и *что это означает*. Через семантические аннотации Flow объясняет свой смысл и назначение, делая системы самодокументируемыми.
 
 ---
 
@@ -161,6 +164,243 @@ export function effectful<In, Out, E extends Effect>(
 // - Мемоизации (детерминированные функции)
 // - Изоляции (функции с IO)
 // - Отката (функции с Write)
+```
+
+### 1.4 Телеологическая Компонента (Цели)
+
+```typescript
+/**
+ * Objective — цель, которую должен достичь Flow
+ */
+export interface Objective<Context = any, Result = any> {
+  // Имя цели
+  readonly name: string;
+
+  // Функция оценки достижения цели (больше — лучше)
+  evaluate(ctx: Context, result: Result): number;
+
+  // Относительный вес цели
+  readonly weight?: number;
+
+  // Целевое значение (опционально)
+  readonly target?: number;
+}
+
+/**
+ * TelosFlow — Flow с явными целями
+ */
+export interface TelosFlow<In, Out> extends Flow<In, Out> {
+  readonly objectives: Objective[];
+  readonly strategy?: OptimizationStrategy;
+}
+
+/**
+ * Добавление целей к Flow
+ */
+export function withObjectives<In, Out>(
+  flow: Flow<In, Out>,
+  objectives: Objective[]
+): TelosFlow<In, Out> {
+  const telosFlow = flow as TelosFlow<In, Out>;
+  (telosFlow as any).objectives = objectives;
+  return telosFlow;
+}
+
+// Примеры целей
+const latencyObjective: Objective = {
+  name: 'latency',
+  evaluate: (ctx, result) => 1000 / ctx.executionTime, // меньше время — лучше
+  weight: 0.7
+};
+
+const accuracyObjective: Objective = {
+  name: 'accuracy',
+  evaluate: (ctx, result) => result.confidence,
+  weight: 0.3,
+  target: 0.95
+};
+
+// Использование
+const optimizedFlow = withObjectives(myFlow, [
+  latencyObjective,
+  accuracyObjective
+]);
+```
+
+### 1.5 Семантическая Компонента (Смысл)
+
+```typescript
+/**
+ * Concept — единица смысла в семантическом пространстве
+ */
+export interface Concept {
+  readonly id: symbol;
+  readonly name: string;
+  readonly description?: string;
+  readonly unit?: string;
+  readonly range?: [min: number, max: number];
+  readonly relations?: Map<string, Set<symbol>>;
+}
+
+/**
+ * SemanticFlow — Flow с семантическими аннотациями
+ */
+export interface SemanticFlow<In, Out> extends Flow<In, Out> {
+  readonly semantics: {
+    // Что означает входной параметр
+    input: Concept | Concept[];
+
+    // Что означает результат
+    output: Concept | Concept[];
+
+    // Какую трансформацию выполняет
+    transformation: {
+      type: string;
+      description: string;
+      preserves?: string[]; // какие свойства сохраняются
+      modifies?: string[]; // какие свойства изменяются
+    };
+
+    // Формальные условия
+    preconditions?: ((input: In) => boolean)[];
+    postconditions?: ((input: In, output: Out) => boolean)[];
+    invariants?: string[];
+  };
+}
+
+/**
+ * Добавление семантики к Flow
+ */
+export function semantic<In, Out>(
+  flow: Flow<In, Out>,
+  semantics: SemanticFlow<In, Out>['semantics']
+): SemanticFlow<In, Out> {
+  const semFlow = flow as SemanticFlow<In, Out>;
+  (semFlow as any).semantics = semantics;
+
+  // В режиме разработки проверяем условия
+  if (process.env.NODE_ENV === 'development') {
+    return wrapWithSemanticChecks(semFlow);
+  }
+
+  return semFlow;
+}
+
+// Пример использования
+const temperatureFlow = semantic(
+  flow((celsius: number) => celsius * 9/5 + 32),
+  {
+    input: {
+      id: Symbol('temperature.celsius'),
+      name: 'temperature',
+      unit: 'celsius',
+      range: [-273.15, Infinity]
+    },
+    output: {
+      id: Symbol('temperature.fahrenheit'),
+      name: 'temperature',
+      unit: 'fahrenheit',
+      range: [-459.67, Infinity]
+    },
+    transformation: {
+      type: 'unit_conversion',
+      description: 'Convert Celsius to Fahrenheit',
+      preserves: ['temperature_value'],
+      modifies: ['unit', 'scale']
+    },
+    preconditions: [
+      (celsius) => celsius >= -273.15 // абсолютный ноль
+    ],
+    postconditions: [
+      (celsius, fahrenheit) => Math.abs((celsius * 9/5 + 32) - fahrenheit) < 0.001
+    ]
+  }
+);
+```
+
+### 1.6 Контекст с Информационными Границами
+
+```typescript
+/**
+ * BoundedContext — контекст с анализом зависимостей и изоляцией
+ */
+export interface BoundedContext extends Context {
+  // Анализ информационных зависимостей
+  dependencies(): Set<string>;
+
+  // Вычисление взаимной информации
+  mutualInformation(key1: string, key2: string): number;
+
+  // Информационная граница
+  boundary(): Set<string>;
+
+  // Создание изолированного подконтекста
+  isolate(keys: string[]): BoundedContext;
+
+  // Метрики доступа
+  readonly metrics: {
+    reads: Map<string, number>;
+    writes: Map<string, number>;
+    accessPatterns: Map<string, AccessPattern>;
+  };
+}
+
+// Реализация с отслеживанием доступа
+class InformationAwareContext extends ImmutableContext implements BoundedContext {
+  private accessLog = new Map<string, AccessPattern>();
+
+  dependencies(): Set<string> {
+    // Анализируем паттерны доступа
+    const deps = new Set<string>();
+    for (const [key, pattern] of this.accessLog) {
+      if (pattern.frequency > DEPENDENCY_THRESHOLD) {
+        deps.add(key);
+      }
+    }
+    return deps;
+  }
+
+  mutualInformation(key1: string, key2: string): number {
+    // I(X;Y) = H(X) + H(Y) - H(X,Y)
+    const pattern1 = this.accessLog.get(key1);
+    const pattern2 = this.accessLog.get(key2);
+
+    if (!pattern1 || !pattern2) return 0;
+
+    // Упрощённый расчёт на основе корреляции доступов
+    const correlation = calculateAccessCorrelation(pattern1, pattern2);
+    return correlation * Math.log2(correlation + 1);
+  }
+
+  boundary(): Set<string> {
+    // Ключи с высокой взаимной информацией образуют границу
+    const boundary = new Set<string>();
+    const keys = Array.from(this.data.keys());
+
+    for (const key of keys) {
+      let totalMI = 0;
+      for (const other of keys) {
+        if (key !== other) {
+          totalMI += this.mutualInformation(key as string, other as string);
+        }
+      }
+
+      if (totalMI > BOUNDARY_THRESHOLD) {
+        boundary.add(key as string);
+      }
+    }
+
+    return boundary;
+  }
+
+  isolate(keys: string[]): BoundedContext {
+    // Создаём изолированный контекст только с указанными ключами
+    const isolated = Object.fromEntries(
+      keys.map(key => [key, this.get(key)])
+    );
+    return new InformationAwareContext(isolated);
+  }
+}
 ```
 
 ---
@@ -472,13 +712,13 @@ const processOrder = saga([
 
 ---
 
-## IV. Квантовые Возможности: Суперпозиция и Коллапс
+## IV. Адаптивное Выполнение: Стратегии и Оптимизация
 
 ### 4.1 Ленивое Выполнение
 
 ```typescript
 /**
- * Flow в суперпозиции — не выполняется до наблюдения
+ * Flow с отложенным выполнением — вычисляется только при необходимости
  */
 const lazy = <In, Out>(f: Flow<In, Out>): Flow<In, Out> => {
   let cached: { input: In; output: Out } | undefined;
@@ -516,9 +756,9 @@ const firstTen = flow((gen: Generator<number>) => {
 
 ```typescript
 /**
- * Квантовый выбор — разные пути с вероятностями
+ * Вероятностный выбор — разные пути выполнения с весами
  */
-const quantum = <In, Out>(
+const probabilistic = <In, Out>(
   branches: Array<{ probability: number; flow: Flow<In, Out> }>
 ): Flow<In, Out> => {
   return flow((input: In) => {
@@ -538,7 +778,7 @@ const quantum = <In, Out>(
 };
 
 // A/B тестирование
-const abTest = quantum([
+const abTest = probabilistic([
   { probability: 0.5, flow: variantA },
   { probability: 0.5, flow: variantB }
 ]);
@@ -1074,25 +1314,33 @@ const evolutionary: Flow<Input, Output> = flow(async (input: Input) => {
 });
 ```
 
-### 10.2 Квантовые Вычисления
+### 10.2 Гибридные Архитектуры
 
 ```typescript
-// Flow для квантового процессора
-const quantumFlow = quantum(
-  flow((qubits: QuantumState) => {
-    return qubits
-      .apply(hadamard())
-      .apply(cnot(0, 1))
-      .apply(measure());
-  })
-);
+// Flow для специализированных процессоров
+const specializedFlow = flow((data: TensorData) => {
+  // Выбор оптимального исполнителя
+  const processor = selectOptimalProcessor(data);
 
-// Автоматический выбор: классический или квантовый
+  return processor.run(
+    flow((tensor: Tensor) => {
+      return tensor
+        .transform(normalize())
+        .apply(convolution())
+        .reduce(aggregate());
+    }),
+    data
+  );
+});
+
+// Автоматический выбор: CPU, GPU, TPU или специализированный чип
 const hybrid = flow((problem: Problem) => {
-  if (isQuantumAdvantage(problem)) {
-    return quantumProcessor.run(quantumFlow, problem);
+  if (isParallelizable(problem)) {
+    return gpuProcessor.run(parallelFlow, problem);
+  } else if (isTensorOperation(problem)) {
+    return tpuProcessor.run(tensorFlow, problem);
   } else {
-    return classicalProcessor.run(classicalFlow, problem);
+    return cpuProcessor.run(sequentialFlow, problem);
   }
 });
 ```
@@ -1144,16 +1392,16 @@ import { flow, context } from '@holon/flow';
 const hello = flow((name: string) => `Hello, ${name}!`);
 
 const ctx = context();
-const result = await ctx.run(hello, 'Quantum World');
+const result = await ctx.run(hello, 'World');
 
-console.log(result); // "Hello, Quantum World!"
+console.log(result); // "Hello, World!"
 ```
 
 ### Путь Вперёд
 
-Это только начало. Holon Flow будет эволюционировать, учиться, адаптироваться. Каждый разработчик, использующий его, вносит вклад в коллективный интеллект системы.
+Это только начало. Holon Flow будет эволюционировать, учиться, адаптироваться. Каждый разработчик, использующий его, вносит вклад в развитие системы.
 
-**Присоединяйтесь к квантовой революции программирования.**
+**Начните с простого. Растите по необходимости. Достигайте большего.**
 
 ---
 

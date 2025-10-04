@@ -948,177 +948,192 @@ class FlowDSL {
 
 ---
 
-## 6. Квантовые Алгоритмы
+## 6. Управление и Оптимизация
 
-### 6.1 Квантовая Суперпозиция в Flow
+### 6.1 Телеологическое Управление
 
 ```typescript
 /**
- * Квантовые вычисления с Flow
+ * Flow с целенаправленным управлением
  */
-class QuantumFlow {
-  // Квантовое состояние
-  private amplitudes: Complex[];
+class ControlledFlow<State, Input, Output> {
+  private state: State;
+  private objectives: Objective<State>[] = [];
+  private controller?: Controller<State, Input>;
 
-  constructor(size: number) {
-    this.amplitudes = new Array(size).fill(new Complex(0, 0));
-    this.amplitudes[0] = new Complex(1, 0);  // |0⟩ состояние
+  constructor(
+    initialState: State,
+    private dynamics: (state: State, input: Input) => State,
+    private observe: (state: State) => Output
+  ) {
+    this.state = initialState;
   }
 
-  // Применение квантового гейта
-  applyGate(gate: QuantumGate): this {
-    const newAmplitudes = new Array(this.amplitudes.length);
-
-    for (let i = 0; i < this.amplitudes.length; i++) {
-      newAmplitudes[i] = new Complex(0, 0);
-      for (let j = 0; j < this.amplitudes.length; j++) {
-        newAmplitudes[i] = newAmplitudes[i].add(
-          gate.matrix[i][j].multiply(this.amplitudes[j])
-        );
-      }
-    }
-
-    this.amplitudes = newAmplitudes;
+  // Добавление целей
+  addObjective(objective: Objective<State>): this {
+    this.objectives.push(objective);
     return this;
   }
 
-  // Гейт Адамара для суперпозиции
-  hadamard(qubit: number): this {
-    const H = QuantumGate.hadamard();
-    return this.applySingleQubitGate(H, qubit);
+  // Установка контроллера
+  setController(controller: Controller<State, Input>): this {
+    this.controller = controller;
+    return this;
   }
 
-  // Квантовая запутанность
-  entangle(qubit1: number, qubit2: number): this {
-    const CNOT = QuantumGate.cnot();
-    return this.applyTwoQubitGate(CNOT, qubit1, qubit2);
+  // Выполнение с управлением
+  execute(targetOutput?: Output): Output {
+    if (this.controller) {
+      // Вычисляем управляющее воздействие
+      const control = this.controller.compute(
+        this.state,
+        targetOutput,
+        this.objectives
+      );
+
+      // Применяем управление
+      this.state = this.dynamics(this.state, control);
+    }
+
+    return this.observe(this.state);
   }
 
-  // Измерение с коллапсом
-  measure(): number {
-    const probabilities = this.amplitudes.map(a =>
-      a.magnitude() ** 2
-    );
+  // Оптимизация по целям
+  optimize(iterations: number = 100): State {
+    for (let i = 0; i < iterations; i++) {
+      // Вычисляем градиенты целей
+      const gradients = this.objectives.map(obj =>
+        this.computeGradient(obj)
+      );
 
-    // Выбираем состояние согласно вероятностям
-    const random = Math.random();
-    let cumulative = 0;
+      // Обновляем состояние в направлении улучшения
+      this.state = this.updateState(this.state, gradients);
 
-    for (let i = 0; i < probabilities.length; i++) {
-      cumulative += probabilities[i];
-      if (random < cumulative) {
-        // Коллапс волновой функции
-        this.collapse(i);
-        return i;
+      // Проверяем сходимость
+      if (this.hasConverged()) break;
+    }
+
+    return this.state;
+  }
+
+  private computeGradient(objective: Objective<State>): Gradient<State> {
+    // Численное дифференцирование
+    const epsilon = 1e-6;
+    const gradient: any = {};
+
+    for (const key in this.state) {
+      const original = this.state[key];
+
+      // Вычисляем производную
+      this.state[key] = (original as any) + epsilon;
+      const valueUp = objective.evaluate(undefined, this.state);
+
+      this.state[key] = (original as any) - epsilon;
+      const valueDown = objective.evaluate(undefined, this.state);
+
+      gradient[key] = (valueUp - valueDown) / (2 * epsilon);
+      this.state[key] = original;
+    }
+
+    return gradient;
+  }
+
+  private updateState(state: State, gradients: Gradient<State>[]): State {
+    const newState = { ...state };
+    const learningRate = 0.01;
+
+    // Суммируем взвешенные градиенты
+    for (const gradient of gradients) {
+      for (const key in gradient) {
+        (newState as any)[key] += learningRate * gradient[key];
       }
     }
 
-    return this.amplitudes.length - 1;
+    return newState;
   }
 
-  private collapse(state: number) {
-    this.amplitudes.fill(new Complex(0, 0));
-    this.amplitudes[state] = new Complex(1, 0);
-  }
+  private hasConverged(): boolean {
+    // Проверяем достижение целей
+    const totalError = this.objectives.reduce((sum, obj) => {
+      const value = obj.evaluate(undefined, this.state);
+      const target = obj.target || 1.0;
+      return sum + Math.abs(value - target);
+    }, 0);
 
-  // Квантовый Flow композиция
-  static compose(...flows: QuantumFlow[]): QuantumFlow {
-    const tensorProduct = flows.reduce((acc, flow) =>
-      acc.tensor(flow)
-    );
-
-    return tensorProduct;
-  }
-
-  // Тензорное произведение
-  tensor(other: QuantumFlow): QuantumFlow {
-    const size = this.amplitudes.length * other.amplitudes.length;
-    const result = new QuantumFlow(0);
-    result.amplitudes = new Array(size);
-
-    for (let i = 0; i < this.amplitudes.length; i++) {
-      for (let j = 0; j < other.amplitudes.length; j++) {
-        const index = i * other.amplitudes.length + j;
-        result.amplitudes[index] = this.amplitudes[i].multiply(
-          other.amplitudes[j]
-        );
-      }
-    }
-
-    return result;
+    return totalError < 0.001;
   }
 }
 ```
 
-### 6.2 Алгоритм Гровера
+### 6.2 Адаптивные Контроллеры
 
 ```typescript
 /**
- * Квантовый поиск с алгоритмом Гровера
+ * PID контроллер для Flow
  */
-class GroverSearch<T> {
-  private oracle: (item: T) => boolean;
-  private items: T[];
+class PIDController<State, Input> implements Controller<State, Input> {
+  private integral: number = 0;
+  private previousError: number = 0;
 
-  constructor(items: T[], oracle: (item: T) => boolean) {
-    this.items = items;
-    this.oracle = oracle;
+  constructor(
+    private kp: number = 1.0, // Пропорциональный коэффициент
+    private ki: number = 0.1, // Интегральный коэффициент
+    private kd: number = 0.01 // Дифференциальный коэффициент
+  ) {}
+
+  compute(
+    currentState: State,
+    targetState: State,
+    objectives?: Objective<State>[]
+  ): Input {
+    // Вычисляем ошибку
+    const error = this.computeError(currentState, targetState, objectives);
+
+    // PID компоненты
+    const P = this.kp * error;
+    const I = this.ki * this.integral;
+    const D = this.kd * (error - this.previousError);
+
+    // Обновляем состояние контроллера
+    this.integral += error;
+    this.previousError = error;
+
+    // Управляющее воздействие
+    return (P + I + D) as any;
   }
 
-  // Поиск элемента
-  search(): T | null {
-    const n = this.items.length;
-    const qubits = Math.ceil(Math.log2(n));
-    const iterations = Math.floor(Math.PI / 4 * Math.sqrt(n));
-
-    // Инициализация в суперпозиции
-    let quantum = new QuantumFlow(2 ** qubits);
-    for (let i = 0; i < qubits; i++) {
-      quantum.hadamard(i);
+  private computeError(
+    current: State,
+    target: State,
+    objectives?: Objective<State>[]
+  ): number {
+    if (objectives && objectives.length > 0) {
+      // Ошибка на основе целей
+      return objectives.reduce((sum, obj) => {
+        const currentValue = obj.evaluate(undefined, current);
+        const targetValue = obj.target || 1.0;
+        return sum + (targetValue - currentValue) * (obj.weight || 1.0);
+      }, 0);
+    } else {
+      // Простая разность состояний
+      return Object.keys(target).reduce((sum, key) => {
+        return sum + ((target as any)[key] - (current as any)[key]);
+      }, 0);
     }
-
-    // Итерации Гровера
-    for (let i = 0; i < iterations; i++) {
-      // Oracle
-      quantum = this.applyOracle(quantum);
-
-      // Diffusion
-      quantum = this.applyDiffusion(quantum, qubits);
-    }
-
-    // Измерение
-    const index = quantum.measure();
-    return index < this.items.length ? this.items[index] : null;
   }
 
-  private applyOracle(quantum: QuantumFlow): QuantumFlow {
-    // Помечаем целевые состояния
-    for (let i = 0; i < this.items.length; i++) {
-      if (this.oracle(this.items[i])) {
-        quantum.applyPhase(i, -1);
-      }
+  // Адаптация коэффициентов
+  adapt(performance: number): void {
+    // Адаптивная настройка PID на основе производительности
+    if (performance < 0.5) {
+      // Плохая производительность - увеличиваем усиление
+      this.kp *= 1.1;
+      this.ki *= 1.05;
+    } else if (performance > 0.9) {
+      // Хорошая производительность - можем уменьшить усиление
+      this.kp *= 0.95;
+      this.kd *= 1.05; // Больше демпфирования
     }
-    return quantum;
-  }
-
-  private applyDiffusion(
-    quantum: QuantumFlow,
-    qubits: number
-  ): QuantumFlow {
-    // 2|ψ⟩⟨ψ| - I операция
-    for (let i = 0; i < qubits; i++) {
-      quantum.hadamard(i);
-      quantum.pauliX(i);
-    }
-
-    quantum.applyControlledZ(qubits);
-
-    for (let i = 0; i < qubits; i++) {
-      quantum.pauliX(i);
-      quantum.hadamard(i);
-    }
-
-    return quantum;
   }
 }
 ```
@@ -1269,7 +1284,7 @@ class SpikingLayer {
 3. **Распределённое Выполнение** — масштабирование на кластеры
 4. **Реактивные Потоки** — управление асинхронными событиями
 5. **Алгебраические Структуры** — математически строгие абстракции
-6. **Квантовые Алгоритмы** — использование квантовых вычислений
+6. **Управление и Оптимизация** — телеологическое управление с адаптивными контроллерами
 7. **Нейроморфные Сети** — энергоэффективные нейронные вычисления
 
 ### Рекомендации по Применению

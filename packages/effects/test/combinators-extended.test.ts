@@ -237,11 +237,10 @@ describe('Extended Combinators', () => {
 
       const retried = retry(effect, { maxAttempts: 2, delay: 10 });
 
-      const promise = retried(null);
-      await vi.advanceTimersByTimeAsync(10);
-
-      await expect(promise).rejects.toThrow('Attempt 2');
+      vi.useRealTimers();
+      await expect(retried(null)).rejects.toThrow('Attempt 2');
       expect(attempts).toBe(2);
+      vi.useFakeTimers();
     });
 
     it('should use exponential backoff', async () => {

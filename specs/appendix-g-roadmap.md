@@ -6,11 +6,11 @@
 Сделать программирование интуитивным процессом описания преобразований информации, где система автоматически находит оптимальный способ выполнения.
 
 ### Долгосрочное Видение (5+ лет)
-- **Универсальная платформа** для любых вычислений
-- **Самооптимизирующаяся** runtime среда
-- **Квантово-классический** гибрид
-- **Нейроморфная** адаптация
-- **AGI-ready** архитектура
+- **Универсальная платформа** для композиционных систем
+- **Адаптивная оптимизация** в runtime
+- **Гибридные архитектуры** (CPU/GPU/TPU)
+- **Визуальное программирование** с формальной верификацией
+- **Автоматическое управление** и достижение целей
 
 ### Ключевые Принципы Развития
 1. **Обратная совместимость** - код v10 работает в v20
@@ -113,13 +113,13 @@
 
 ## G.3 Roadmap 2026
 
-### Q1 2026: v11.0.0 - Quantum Leap
+### Q1 2026: v11.0.0 - Adaptive Control
 
-#### Quantum Computing
-- [ ] Quantum Flow abstractions
-- [ ] Симулятор квантовых вычислений
-- [ ] Гибридные алгоритмы
-- [ ] Интеграция с IBM Quantum, Google Cirq
+#### Телеологическое Управление
+- [ ] Полная система целей и objectives
+- [ ] PID и MPC контроллеры
+- [ ] Автоматическая оптимизация под цели
+- [ ] Многокритериальная балансировка
 
 #### WebAssembly
 - [ ] WASM compilation target
@@ -155,67 +155,73 @@
 - [ ] Performance regression detection
 - [ ] Self-healing systems
 
-### Q4 2026: v11.3.0 - Singularity Preparation
+### Q4 2026: v11.3.0 - Semantic Intelligence
 
-#### AGI Readiness
-- [ ] Natural language to Flow
-- [ ] Self-modifying code
-- [ ] Goal-oriented programming
-- [ ] Semantic understanding
+#### Семантическая Система
+- [ ] Natural language описания Flow
+- [ ] Автоматическая генерация кода из спецификаций
+- [ ] Семантический поиск и рекомендации
+- [ ] Самодокументируемый код
 
 ---
 
 ## G.4 Long-term Vision (2027-2030)
 
-### 2027: Autonomous Systems
+### 2027: Формальная Верификация
 
-#### Self-Governing Flow
-- Automatic resource management
-- Self-scaling infrastructure
-- Predictive maintenance
-- Zero-downtime evolution
+#### Математические Гарантии
+- Автоматическое доказательство корректности
+- Формальная спецификация на TLA+ или Coq
+- Верификация инвариантов в compile-time
+- Сертификация для критических систем
 
-#### Formal Verification
-- Mathematical proof generation
-- Automatic correctness checking
-- Safety-critical certifications
-- Compliance automation
+#### Визуальная Платформа
+- Полноценный visual builder для Flow
+- Drag-and-drop конструктор систем
+- Визуальная отладка и профилирование
+- Автоматическая генерация документации
 
-### 2028: Planetary Scale
+### 2028: Масштабируемость
 
-#### Global Computing Fabric
-- Earth-scale distributed system
-- Satellite edge computing
-- Interplanetary protocols
-- Quantum entanglement communication
+#### Распределённые Системы
+- Автоматическое шардирование
+- Консенсус-протоколы (Raft, Paxos)
+- Глобальная репликация состояния
+- Edge computing оптимизация
 
-#### Universal Interoperability
-- Any language compilation
-- Legacy system absorption
-- Protocol auto-negotiation
-- Semantic translation
+#### Интеграция с ML/AI
+- Flow как ML pipeline
+- AutoML для оптимизации Flow
+- Интеграция с TensorFlow/PyTorch
+- Обучающиеся контроллеры
 
-### 2029: Conscious Computing
+### 2029: Полная Автоматизация
 
-#### Emergent Intelligence
-- Self-aware systems
-- Ethical decision making
-- Creative problem solving
-- Emotional computing
+#### Автономное Управление
+- Самооптимизирующиеся системы
+- Предиктивная адаптация к нагрузке
+- Автоматическое масштабирование
+- Self-healing при сбоях
 
-#### Human-AI Symbiosis
-- Brain-computer interfaces
-- Thought-driven programming
-- Augmented cognition
-- Collective intelligence
+#### Универсальная Совместимость
+- Компиляция в любой целевой язык
+- Интеграция с legacy системами
+- Автоматическая миграция кода
+- Кросс-платформенное выполнение
 
-### 2030: Technological Singularity
+### 2030: Зрелая Экосистема
 
-#### Post-Human Computing
-- Beyond von Neumann architecture
-- Quantum-biological hybrid
-- N-dimensional computing
-- Reality manipulation
+#### Индустриальный Стандарт
+- ISO/IEC стандартизация
+- Широкое enterprise применение
+- Образовательные программы
+- Большое сообщество разработчиков
+
+#### Специализированные Решения
+- Domain-specific Flow языки
+- Отраслевые библиотеки
+- Готовые архитектурные паттерны
+- Marketplace компонентов
 
 ---
 
@@ -305,17 +311,17 @@ graph LR
 
 ### Active Research Areas
 
-#### Quantum Algorithms
-- **Lead:** MIT Quantum Lab
-- **Goal:** Native quantum Flow execution
+#### Адаптивная Оптимизация
+- **Lead:** MIT CSAIL
+- **Goal:** Автоматическая оптимизация Flow в runtime
 - **Timeline:** 2025-2027
-- **Budget:** $5M
+- **Budget:** $3M
 
-#### Neuromorphic Compilation
-- **Lead:** Stanford AI Lab
-- **Goal:** Brain-inspired computation
+#### Визуальное Программирование
+- **Lead:** Stanford HCI Lab
+- **Goal:** Интуитивный конструктор Flow систем
 - **Timeline:** 2025-2028
-- **Budget:** $8M
+- **Budget:** $5M
 
 #### Formal Verification
 - **Lead:** Carnegie Mellon
@@ -327,7 +333,7 @@ graph LR
 
 | Organization | Focus Area | Status |
 |--------------|------------|---------|
-| Google | Quantum computing | In discussion |
+| Google | Cloud Platform & TPU | In discussion |
 | Microsoft | Azure integration | Signed |
 | IBM | Enterprise tools | Pilot |
 | Amazon | Serverless | Planning |
